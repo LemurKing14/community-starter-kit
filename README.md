@@ -1,10 +1,11 @@
 # welcome bot: A Probot App
 
-Fill in the blank
+Welcome bot automatically greets newcomers to your project.
 
 ## What it does
 
-Frustration
+The bot posts friendly messages on new issues and pull requests to encourage
+collaboration.
 
 ## Getting started
 
