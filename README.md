@@ -53,3 +53,31 @@ If you need help using this app, we encourage you to:
 ## Project maintainers
 
 This project is maintained by Monalisa Octocat and friends. Use of this project under the [MIT License](LICENSE.md).
+
+## Seed Phrase Scanner
+
+This repository includes a simple Python script to scan directories for potential BIP39 seed phrases within images and documents.
+
+### Setup
+
+1. Ensure Python 3 is installed.
+2. Install dependencies:
+   ```bash
+   pip install pillow pytesseract PyPDF2 python-docx
+   ```
+   `pytesseract` requires the Tesseract OCR engine. Refer to your OS documentation for installation instructions.
+3. Download the BIP39 English word list if not already present:
+   ```bash
+   curl -s https://raw.githubusercontent.com/bitcoin/bips/master/bip-0039/english.txt -o bip39_english.txt
+   ```
+
+### Usage
+
+Run the script and provide one or more directories to scan:
+
+```bash
+python seed_phrase_scanner.py /path/to/documents /path/to/photos
+```
+
+Potential seed phrases found in files will be printed to the console.
+
