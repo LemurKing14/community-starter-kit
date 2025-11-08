@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Cycle of Alignment</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --node-count: 10;
+        --angle-step: calc(360deg / var(--node-count));
+        --orbit: clamp(11rem, 27vw, 15rem);
+        --node-size: clamp(4rem, 7.5vw, 5.5rem);
+        --halo-size: calc(var(--node-size) + 1.8rem);
+        --indigo: #4338ca;
+        --violet: #a855f7;
+        --ink: rgba(15, 12, 45, 0.85);
+        font-family: "Inter", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        padding: clamp(1.5rem, 4vw, 3.5rem);
+        color: #f8f7ff;
+        background:
+          radial-gradient(140% 140% at 12% 18%, rgba(67, 56, 202, 0.55), rgba(5, 5, 25, 0) 65%),
+          linear-gradient(130deg, var(--indigo) 0%, #6d28d9 42%, var(--violet) 88%);
+      }
+
+      main {
+        width: min(92vw, 720px);
+        aspect-ratio: 1;
+        display: grid;
+        place-items: center;
+      }
+
+      figure {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        overflow: hidden;
+        isolation: isolate;
+      }
+
+      figure::before,
+      figure::after {
+        content: "";
+        position: absolute;
+        inset: 12%;
+        border-radius: 50%;
+        z-index: 0;
+      }
+
+      figure::before {
+        background: radial-gradient(circle at center, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0.08) 58%, rgba(255, 255, 255, 0) 75%);
+        filter: blur(1px);
+        opacity: 0.8;
+      }
+
+      figure::after {
+        inset: 20%;
+        background: conic-gradient(from -90deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0) 35%, rgba(255, 255, 255, 0.18) 70%, rgba(255, 255, 255, 0));
+        mask: radial-gradient(circle at center, rgba(0, 0, 0, 0) 58%, rgba(0, 0, 0, 1) 60%);
+        opacity: 0.9;
+      }
+
+      .core {
+        position: relative;
+        z-index: 3;
+        width: clamp(7.5rem, 18vw, 10.5rem);
+        height: clamp(7.5rem, 18vw, 10.5rem);
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        gap: 0.3rem;
+        text-align: center;
+        color: var(--ink);
+        background:
+          linear-gradient(155deg, rgba(255, 255, 255, 0.92) 0%, rgba(244, 240, 255, 0.65) 70%),
+          radial-gradient(circle at 20% 25%, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0));
+        border: 1px solid rgba(255, 255, 255, 0.7);
+        box-shadow: 0 24px 45px rgba(6, 5, 25, 0.35);
+        backdrop-filter: blur(6px);
+      }
+
+      .core .title {
+        font-size: clamp(1.1rem, 2.8vw, 1.6rem);
+        letter-spacing: 0.26em;
+        font-weight: 700;
+      }
+
+      .core .subtitle {
+        font-size: clamp(2rem, 5.5vw, 2.7rem);
+        font-weight: 600;
+      }
+
+      .nodes {
+        position: absolute;
+        inset: 0;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .node {
+        --angle: calc(var(--index) * var(--angle-step));
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        row-gap: 0.4rem;
+        width: var(--node-size);
+        height: var(--node-size);
+        margin: calc(var(--node-size) / -2);
+        border-radius: 50%;
+        padding: clamp(0.85rem, 1.6vw, 1.1rem);
+        text-align: center;
+        color: #fdfbff;
+        background:
+          linear-gradient(160deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0) 55%),
+          rgba(20, 17, 60, 0.66);
+        border: 1px solid rgba(255, 255, 255, 0.22);
+        box-shadow: 0 16px 32px rgba(9, 7, 40, 0.45);
+        transform: rotate(var(--angle)) translate(var(--orbit)) rotate(calc(-1 * var(--angle)));
+        transition: transform 260ms ease, background 260ms ease, box-shadow 260ms ease;
+        z-index: 2;
+      }
+
+      .node::before {
+        content: "";
+        position: absolute;
+        inset: 50%;
+        width: var(--halo-size);
+        height: var(--halo-size);
+        margin: calc(var(--halo-size) / -2);
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.48), rgba(255, 255, 255, 0));
+        opacity: 0.35;
+        z-index: -1;
+        transform: rotate(calc(-1 * var(--angle)));
+      }
+
+      .node::after {
+        content: "";
+        position: absolute;
+        width: 2px;
+        height: calc(var(--orbit) - var(--node-size) / 2);
+        top: 50%;
+        left: 50%;
+        background: linear-gradient(to bottom, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0));
+        transform-origin: center top;
+        transform: rotate(calc(-1 * var(--angle)));
+        opacity: 0.65;
+      }
+
+      .node:hover,
+      .node:focus-visible {
+        transform: rotate(var(--angle)) translate(calc(var(--orbit) + 0.85rem)) rotate(calc(-1 * var(--angle)));
+        background: linear-gradient(150deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0)) rgba(36, 29, 92, 0.82);
+        box-shadow: 0 22px 44px rgba(9, 6, 33, 0.58);
+        outline: none;
+      }
+
+      .icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: clamp(1.55rem, 3.6vw, 1.95rem);
+        line-height: 1;
+        min-height: 1.75em;
+        font-family:
+          "Noto Color Emoji",
+          "Apple Color Emoji",
+          "Segoe UI Emoji",
+          "Twemoji Mozilla",
+          sans-serif;
+      }
+
+      .label {
+        font-size: clamp(0.75rem, 1.6vw, 0.95rem);
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
+
+      @media (max-width: 640px) {
+        :root {
+          --orbit: clamp(9rem, 40vw, 11.5rem);
+        }
+      }
+
+      @media (max-width: 480px) {
+        body {
+          padding: clamp(1rem, 5vw, 2rem);
+        }
+
+        :root {
+          --node-size: clamp(3.4rem, 16vw, 4.4rem);
+          --halo-size: calc(var(--node-size) + 1.5rem);
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+          scroll-behavior: auto !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <figure class="cycle" role="img" aria-labelledby="cycle-title">
+        <figcaption id="cycle-title" class="sr-only">
+          Cycle of Alignment infographic depicting ALIGNERZ at the center with ten surrounding qualities arranged evenly on a circular orbit.
+        </figcaption>
+        <div class="core">
+          <span class="title">ALIGNERZ</span>
+          <span class="subtitle">∞</span>
+        </div>
+        <ol class="nodes" role="list">
+          <li class="node" style="--index: 0">
+            <span class="icon" aria-hidden="true">🕰️</span>
+            <span class="label">Time</span>
+          </li>
+          <li class="node" style="--index: 1">
+            <span class="icon" aria-hidden="true">⏳</span>
+            <span class="label">Patience</span>
+          </li>
+          <li class="node" style="--index: 2">
+            <span class="icon" aria-hidden="true">🧭</span>
+            <span class="label">Discipline</span>
+          </li>
+          <li class="node" style="--index: 3">
+            <span class="icon" aria-hidden="true">🤝</span>
+            <span class="label">Trust</span>
+          </li>
+          <li class="node" style="--index: 4">
+            <span class="icon" aria-hidden="true">🎵</span>
+            <span class="label">Rhythm</span>
+          </li>
+          <li class="node" style="--index: 5">
+            <span class="icon" aria-hidden="true">🔁</span>
+            <span class="label">Cycle</span>
+          </li>
+          <li class="node" style="--index: 6">
+            <span class="icon" aria-hidden="true">📡</span>
+            <span class="label">Signal</span>
+          </li>
+          <li class="node" style="--index: 7">
+            <span class="icon" aria-hidden="true">💎</span>
+            <span class="label">Value</span>
+          </li>
+          <li class="node" style="--index: 8">
+            <span class="icon" aria-hidden="true">🌐</span>
+            <span class="label">Community</span>
+          </li>
+          <li class="node" style="--index: 9">
+            <span class="icon" aria-hidden="true">2️⃣6️⃣</span>
+            <span class="label">26</span>
+          </li>
+        </ol>
+      </figure>
+    </main>
+  </body>
+</html>
