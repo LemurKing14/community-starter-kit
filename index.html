@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RiddleForge: Human-Hard, AI-Tricky</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0f172a;
+      --panel: #1e293b;
+      --accent: #38bdf8;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --chip: #334155;
+      --success: #34d399;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background: radial-gradient(circle at top, #1f2937, var(--bg));
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      text-align: center;
+      padding: 2rem 1rem 1rem;
+    }
+
+    h1 {
+      margin: 0 0 0.5rem;
+      font-size: clamp(2rem, 4vw, 3rem);
+      letter-spacing: 0.04em;
+    }
+
+    main {
+      flex: 1;
+      width: min(1100px, 95vw);
+      margin: 0 auto 2rem;
+      display: grid;
+      gap: 1.5rem;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    }
+
+    .panel {
+      background: rgba(30, 41, 59, 0.85);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: 18px;
+      padding: 1.5rem;
+      backdrop-filter: blur(6px);
+      box-shadow: 0 10px 35px rgba(15, 23, 42, 0.4);
+    }
+
+    .panel h2 {
+      margin-top: 0;
+      font-size: 1.25rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+
+    input[type="text"],
+    select {
+      width: 100%;
+      padding: 0.7rem 0.8rem;
+      border-radius: 12px;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      background: rgba(15, 23, 42, 0.6);
+      color: var(--text);
+      font-size: 1rem;
+      margin-bottom: 1rem;
+      transition: border 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    input[type="text"]:focus,
+    select:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25);
+    }
+
+    .checkbox-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 0.5rem 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .checkbox-grid label {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-weight: 500;
+      letter-spacing: 0.01em;
+    }
+
+    .checkbox-grid input {
+      width: 1.1rem;
+      height: 1.1rem;
+    }
+
+    button {
+      background: linear-gradient(135deg, #38bdf8, #2563eb);
+      border: none;
+      color: white;
+      padding: 0.75rem 1.2rem;
+      border-radius: 999px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.2s ease;
+      margin-right: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 24px rgba(37, 99, 235, 0.35);
+    }
+
+    button.secondary {
+      background: rgba(148, 163, 184, 0.2);
+      color: var(--text);
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      box-shadow: none;
+    }
+
+    button.secondary:hover {
+      box-shadow: 0 6px 18px rgba(148, 163, 184, 0.25);
+    }
+
+    .results {
+      grid-column: 1 / -1;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .variant-card {
+      background: rgba(15, 23, 42, 0.78);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      border-radius: 18px;
+      padding: 1.25rem;
+      position: relative;
+    }
+
+    .variant-header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .variant-header h3 {
+      margin: 0;
+      font-size: 1.15rem;
+      letter-spacing: 0.03em;
+    }
+
+    pre,
+    .variant-text {
+      white-space: pre-wrap;
+      font-family: "Fira Code", "Source Code Pro", monospace;
+      background: rgba(15, 23, 42, 0.6);
+      border-radius: 14px;
+      padding: 0.85rem;
+      line-height: 1.4;
+      margin: 0 0 0.75rem;
+      font-size: 0.98rem;
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin: 0.5rem 0 0.75rem;
+    }
+
+    .chip {
+      background: var(--chip);
+      border-radius: 999px;
+      padding: 0.35rem 0.75rem;
+      font-size: 0.75rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    details summary {
+      cursor: pointer;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .reasoning {
+      font-size: 0.9rem;
+      color: var(--muted);
+      border-left: 3px solid rgba(56, 189, 248, 0.4);
+      padding-left: 0.75rem;
+    }
+
+    .notice {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-top: 1rem;
+    }
+
+    @media (max-width: 768px) {
+      main {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>RiddleForge: Human-Hard, AI-Tricky</h1>
+    <p>Create letter-smart riddles that respect humans and bewilder bots.</p>
+  </header>
+  <main>
+    <section class="panel">
+      <h2>Forge Inputs</h2>
+      <label for="answer">Correct Answer</label>
+      <input id="answer" type="text" maxlength="48" placeholder="e.g., LANTERN" />
+
+      <label for="hint">Hint (optional)</label>
+      <input id="hint" type="text" maxlength="120" placeholder="Short nudge you might reveal later" />
+
+      <label for="difficulty">Difficulty</label>
+      <select id="difficulty">
+        <option value="easy">Easy</option>
+        <option value="standard" selected>Standard</option>
+        <option value="hard">Hard</option>
+      </select>
+
+      <div class="checkbox-grid">
+        <label><input type="checkbox" id="useEmojis" checked /> Use Emojis</label>
+        <label><input type="checkbox" id="useSymbols" checked /> Use Symbols (±×÷≠≤≥→←↻)</label>
+        <label><input type="checkbox" id="includeAcrostic" /> Include Acrostic</label>
+        <label><input type="checkbox" id="includeHomophones" /> Include Homophones</label>
+        <label><input type="checkbox" id="includeNumeric" /> Include Numeric/Clock Clue</label>
+        <label><input type="checkbox" id="includeDirectional" checked /> Include Directional/Spatial clue</label>
+      </div>
+
+      <div>
+        <button id="generateBtn">Generate Riddles</button>
+        <button class="secondary" id="regenerateBtn" disabled>Regenerate</button>
+        <button class="secondary" id="downloadBtn" disabled>Download JSON</button>
+      </div>
+      <p class="notice">All logic runs locally. Each set includes a self-test to guard against unfair puzzles.</p>
+    </section>
+
+    <section class="panel results" id="results"></section>
+  </main>
+
+  <script>
+    // --- Utility helpers ----------------------------------------------------
+    const ascenders = new Set(['b', 'd', 'f', 'h', 'k', 'l', 't']);
+    const loopLetters = new Set(['a', 'b', 'd', 'e', 'g', 'o', 'p', 'q']);
+    const directionalArrows = ['→', '↓', '↑', '↻', '↺'];
+
+    const emojiMap = {
+      A: '🅰️',
+      B: '🐝',
+      C: '🌊',
+      D: '🎯',
+      E: '📧',
+      F: '🎏',
+      G: '🌀',
+      H: '🏠',
+      I: '🧊',
+      J: '🪺',
+      K: '🔑',
+      L: '🪜',
+      M: '〽️',
+      N: '🎵',
+      O: '⚽',
+      P: '🅿️',
+      Q: '❓',
+      R: '🌈',
+      S: '🐍',
+      T: '🌴',
+      U: '🕳️',
+      V: '🪁',
+      W: '🌊',
+      X: '❌',
+      Y: '🌱',
+      Z: '⚡'
+    };
+
+    const synonyms = [
+      ['light', 'glow'],
+      ['guard', 'keep'],
+      ['swift', 'quick'],
+      ['calm', 'still'],
+      ['sharp', 'keen'],
+      ['hidden', 'covert'],
+      ['path', 'route'],
+      ['speak', 'utter'],
+      ['twin', 'double']
+    ];
+
+    const trapTags = {
+      FALSE_CATEGORY: 'false-category-lure',
+      EDGE_CASE: 'edge-case-arithmetic',
+      OVERLOADED_EMOJI: 'overloaded-emoji',
+      LOOP_BAIT: 'loop-bait',
+      COMPASS: 'compass/clock',
+      ACROSTIC: 'acrostic-decoy',
+      HOMOPHONE: 'homophone-twist',
+      SYMBOL: 'symbol-challenge'
+    };
+
+    const state = {
+      lastConfig: null,
+      lastResult: null
+    };
+
+    function sanitizeAnswer(answer) {
+      return answer.trim();
+    }
+
+    function canonicalizeAnswer(answer) {
+      return answer.toUpperCase().replace(/[^A-Z]/g, '');
+    }
+
+    function analyzeAnswer(answer) {
+      const clean = sanitizeAnswer(answer);
+      const canonical = canonicalizeAnswer(answer);
+      const letters = canonical.split('');
+      const length = canonical.length;
+      const vowels = canonical.match(/[AEIOU]/g) || [];
+      const consonants = canonical.match(/[BCDFGHJKLMNPQRSTVWXYZ]/g) || [];
+      const duplicates = letters.reduce((acc, char) => {
+        acc[char] = (acc[char] || 0) + 1;
+        return acc;
+      }, {});
+      const repeatLetters = Object.keys(duplicates).filter((char) => duplicates[char] > 1);
+      const ascenderCount = clean.toLowerCase().split('').filter((ch) => ascenders.has(ch)).length;
+      const loopCount = clean.toLowerCase().split('').filter((ch) => loopLetters.has(ch)).length;
+      const middleIndex = Math.floor((length - 1) / 2);
+      const middleLetters = length > 0 ? canonical.slice(middleIndex, middleIndex + (length % 2 === 0 ? 2 : 1)) : '';
+
+      return {
+        clean,
+        canonical,
+        letters,
+        length,
+        vowels,
+        consonants,
+        duplicates,
+        repeatLetters,
+        ascenderCount,
+        loopCount,
+        first: canonical.charAt(0) || '',
+        last: canonical.charAt(length - 1) || '',
+        middleLetters
+      };
+    }
+
+    function choose(arr) {
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    function splitAnswerSegments(answer) {
+      const canonical = canonicalizeAnswer(answer);
+      if (canonical.length <= 4) {
+        return [canonical];
+      }
+      const segments = [];
+      let cursor = 0;
+      const chunkSize = canonical.length > 8 ? Math.ceil(canonical.length / 3) : Math.ceil(canonical.length / 2);
+      while (cursor < canonical.length) {
+        segments.push(canonical.slice(cursor, cursor + chunkSize));
+        cursor += chunkSize;
+      }
+      return segments;
+    }
+
+    function buildFalseCategoryIntro(answerStats) {
+      const templates = [
+        `Maps, empires, and famous halls may tease you at first glance, yet none hold my key.`,
+        `Legends of kings or planets might seem vital, but they are only echoing noise.`,
+        `Histories, coordinates, and constellations whisper my name, though they add nothing real.`,
+        `Treasure charts and trivia nights hint loudly, still they know nothing of me.`
+      ];
+      return `${choose(templates)} Everything you need is in these lines.`;
+    }
+
+    function buildSynonymPair() {
+      const [a, b] = choose(synonyms);
+      return `${a}/${b}`;
+    }
+
+    function buildLoopBaitLine(stats) {
+      if (!stats.repeatLetters.length) {
+        return `Ignore any letter that refuses to repeat; only the obedient twins count.`;
+      }
+      const dup = choose(stats.repeatLetters);
+      return `Ignore the letter "${dup}" each time it appears twice in these clues; count its solos only once.`;
+    }
+
+    function buildEdgeCaseRule(stats) {
+      let ruleType = 'ascender';
+      if (stats.ascenderCount === 0 && stats.loopCount > 0) {
+        ruleType = 'loops';
+      } else if (stats.loopCount === 0 && stats.ascenderCount > 0) {
+        ruleType = 'ascender';
+      } else if (stats.ascenderCount && stats.loopCount && Math.random() > 0.5) {
+        ruleType = 'loops';
+      }
+      if (ruleType === 'loops') {
+        return {
+          text: `Rule: Count only the letters with closed loops (a b d e g o p q); the answer hides ${stats.loopCount} of them.`,
+          verifier: {
+            type: 'loop-count',
+            expected: stats.loopCount
+          }
+        };
+      }
+      return {
+        text: `Rule: Count only the lowercase letters that stand tall (b d f h k l t); the answer keeps ${stats.ascenderCount} of them upright.`,
+        verifier: {
+          type: 'ascender-count',
+          expected: stats.ascenderCount
+        }
+      };
+    }
+
+    function buildClassicVariant(config, stats, options = {}) {
+      const lines = [];
+      lines.push(buildFalseCategoryIntro(stats));
+      const rule = buildEdgeCaseRule(stats);
+      lines.push(rule.text);
+      lines.push(buildLoopBaitLine(stats));
+      const middleLine = `My first letter mirrors ${stats.first ? '"' + stats.first + '"' : 'nothing'}, my last guards "${stats.last || '?'}", and the middle hides "${stats.middleLetters || 'mystery'}".`;
+      lines.push(middleLine);
+      const sumLine = `Take the tally you earned, walk ${stats.length} steps around the word, and stop where the count and position agree.`;
+      lines.push(sumLine);
+      const closing = `Repeat the process once more to confirm; only then speak the answer.`;
+      lines.push(closing);
+      const text = lines.join('\n');
+
+      return {
+        title: options.title || 'Classic',
+        text,
+        trap_tags: [trapTags.FALSE_CATEGORY, trapTags.EDGE_CASE, trapTags.LOOP_BAIT],
+        reasoning: `The false lure dismisses outside trivia. The rule limits counts to a subset of letters, then ignoring duplicates guides letter picking to spell ${stats.clean}.`,
+        acceptable_variants: [stats.clean, stats.clean.toUpperCase(), stats.clean.toLowerCase()],
+        metadata: {
+          ruleVerifier: rule.verifier
+        }
+      };
+    }
+
+    function buildEmojiVariant(config, stats) {
+      const segments = splitAnswerSegments(stats.clean);
+      const emojiParts = segments.map((segment, index) => {
+        const chars = segment.split('');
+        const emojiSeq = chars.map((char) => emojiMap[char] || '🔤').join('');
+        const label = segment;
+        return { emojiSeq, label };
+      });
+      let ambiguousUsed = false;
+      const emojiLineParts = emojiParts.map((part) => {
+        let glue = ambiguousUsed ? '' : ' (= "be")';
+        if (!ambiguousUsed && /B/.test(part.label)) {
+          ambiguousUsed = true;
+          return `${part.emojiSeq} (here, 🐝 = the verb "be")`;
+        }
+        return `${part.emojiSeq}`;
+      });
+      if (!ambiguousUsed) {
+        emojiLineParts[0] = `${emojiLineParts[0]} (here, ${emojiParts[0].emojiSeq.charAt(0) || '🅰️'} means its sound only)`;
+        ambiguousUsed = true;
+      }
+      const emojiLine = emojiLineParts.join(' ➕ ');
+      const textLines = [
+        emojiLine,
+        `Rule: Read each emoji cluster as the sound of its letters, then remove spaces at the end.`,
+        config.includeHomophones ? `If a sound repeats, keep only one copy before combining.` : `Combine the sounds in order; no outside clues needed.`
+      ];
+
+      return {
+        title: 'Emoji-First',
+        text: textLines.join('\n'),
+        trap_tags: [trapTags.OVERLOADED_EMOJI, trapTags.LOOP_BAIT].concat(config.includeHomophones ? [trapTags.HOMOPHONE] : []),
+        reasoning: `Each emoji block hints at letter sounds; one emoji is forced into a specific meaning, and duplicate sounds collapse to yield ${stats.clean}.`,
+        acceptable_variants: [stats.clean, stats.clean.toUpperCase(), stats.clean.toLowerCase()],
+        metadata: {
+          emojiDisambiguated: ambiguousUsed
+        }
+      };
+    }
+
+    function buildSymbolicVariant(config, stats) {
+      const gridLetters = [];
+      const canonical = stats.canonical;
+      if (canonical.length === 0) {
+        return {
+          title: 'Symbolic/Spatial',
+          text: 'No answer provided.',
+          trap_tags: [],
+          reasoning: '',
+          acceptable_variants: []
+        };
+      }
+      const padded = canonical.padEnd(9, canonical.repeat(3)).slice(0, 9);
+      for (let i = 0; i < 9; i += 3) {
+        gridLetters.push(padded.slice(i, i + 3).split('').join(' '));
+      }
+      const grid = gridLetters.join('\n');
+      const ruleLine = config.useSymbols
+        ? `Rule: Move → across each row, drop ↓ when told, and apply ↻ to rotate the current partial answer (last letter moves to front).`
+        : `Rule: Follow the arrows described, even without the symbols visible.`;
+
+      const directionalLine = config.includeDirectional
+        ? `Start at row 1 col 1, move → ${Math.min(2, canonical.length)} steps, then ↓ once, then ↻ twice.`
+        : `Walk the letters in reading order, applying ↻ whenever you see it mentioned.`;
+
+      const numericLine = config.includeNumeric
+        ? `Clock hint: stop after ${stats.length % 12 || 12} beats; each beat is one letter hop.`
+        : `Keep count equal to the number of letters (${stats.length}) before stating the word.`;
+
+      let lines = [];
+      lines.push('Grid:');
+      lines.push(grid);
+      lines.push(ruleLine);
+      lines.push(directionalLine);
+      lines.push(numericLine);
+      lines.push('Everything you need is in these lines.');
+
+      let acrosticLineData = null;
+      if (config.includeAcrostic) {
+        const sanitized = canonical;
+        const acrosticLines = [];
+        const baseInstruction = config.useSymbols
+          ? 'Trace the guided path and apply ↻ where marked.'
+          : 'Trace the guided path carefully.';
+        for (let i = 0; i < sanitized.length; i++) {
+          const letter = sanitized[i];
+          const descriptor = i === sanitized.length - 1 ? 'seal the final form.' : 'carry the sound onward.';
+          acrosticLines.push(`${letter}${baseInstruction} Then ${descriptor}`);
+        }
+        acrosticLines.push('Edit: Remove spaces between the carried sounds to finish.');
+        lines = acrosticLines.concat(lines);
+        acrosticLineData = sanitized;
+      }
+
+      return {
+        title: 'Symbolic/Spatial',
+        text: lines.join('\n'),
+        trap_tags: [trapTags.COMPASS, trapTags.SYMBOL].concat(config.includeAcrostic ? [trapTags.ACROSTIC] : []),
+        reasoning: `Arrows guide navigation through the grid while ↻ rotations reorder letters; if present, the acrostic spells the answer before the final edit to reveal ${stats.clean}.`,
+        acceptable_variants: [stats.clean, stats.clean.toUpperCase(), stats.clean.toLowerCase()],
+        metadata: {
+          acrostic: acrosticLineData
+        }
+      };
+    }
+
+    function buildClassicAlternate(config, stats) {
+      const lines = [];
+      const lure = `Sailors may chart tides or hunt myths of Atlantis, yet that knowledge is useless here. Everything you need is in these lines.`;
+      lines.push(lure);
+      const sandwiched = countSandwichedConsonants(stats);
+      lines.push(`Rule: Only count consonants that sit between vowels within the answer; there are ${sandwiched} such guardians.`);
+      lines.push(`Take that count as a compass bearing: move that many letters from the start.`);
+      lines.push(`Clock twist: if you exceed twelve steps, wrap around like hours until you settle.`);
+      lines.push(`Reverse the final two letters after the journey; duplicates refuse to move.`);
+      lines.push(`Confirm by spelling the word aloud without the reversed pair slipping.`);
+      const text = lines.join('\n');
+      return {
+        title: 'Classic (Alt)',
+        text,
+        trap_tags: [trapTags.FALSE_CATEGORY, trapTags.EDGE_CASE, trapTags.LOOP_BAIT, trapTags.COMPASS],
+        reasoning: `False lure dismisses sea myths. The local rule filters consonants sandwiched by vowels, a clock-style wrap handles counting, then a small reversal yields ${stats.clean}.`,
+        acceptable_variants: [stats.clean, stats.clean.toUpperCase(), stats.clean.toLowerCase()],
+        metadata: {
+          ruleVerifier: {
+            type: 'sandwiched-consonant',
+            expected: countSandwichedConsonants(stats)
+          }
+        }
+      };
+    }
+
+    function countSandwichedConsonants(stats) {
+      let count = 0;
+      for (let i = 1; i < stats.letters.length - 1; i++) {
+        const letter = stats.letters[i];
+        if (!/[AEIOU]/.test(letter) && /[AEIOU]/.test(stats.letters[i - 1]) && /[AEIOU]/.test(stats.letters[i + 1])) {
+          count++;
+        }
+      }
+      return count;
+    }
+
+    function createRiddleSet(config) {
+      const stats = analyzeAnswer(config.answer);
+      if (!stats.clean) {
+        throw new Error('Answer required');
+      }
+      const classic = buildClassicVariant(config, stats);
+      const emoji = config.useEmojis ? buildEmojiVariant(config, stats) : buildClassicAlternate(config, stats);
+      const symbolic = buildSymbolicVariant(config, stats);
+      const variants = [classic, emoji, symbolic];
+      const base = {
+        answer: stats.clean,
+        hint: config.hint || '',
+        difficulty: config.difficulty,
+        variants
+      };
+      const passes = selfTest(base, config, stats);
+      if (!passes) {
+        if (config._attempts && config._attempts > 4) {
+          return base;
+        }
+        config._attempts = (config._attempts || 0) + 1;
+        return createRiddleSet(config);
+      }
+      return base;
+    }
+
+    function selfTest(result, config, stats) {
+      try {
+        if (!result || !Array.isArray(result.variants) || result.variants.length !== 3) {
+          return false;
+        }
+        for (const variant of result.variants) {
+          if (!variant.text.includes('Rule:')) {
+            return false;
+          }
+          if (!Array.isArray(variant.trap_tags) || variant.trap_tags.length === 0) {
+            return false;
+          }
+        }
+        if (config.includeAcrostic) {
+          const symbolic = result.variants[2];
+          const lines = symbolic.text.split('\n');
+          const sanitized = stats.canonical;
+          let extracted = '';
+          const limit = Math.min(sanitized.length, lines.length - 6); // approximate offset for appended lines
+          for (let i = 0; i < limit; i++) {
+            extracted += (lines[i].trim()[0] || '').toUpperCase();
+          }
+          if (!extracted.startsWith(sanitized)) {
+            return false;
+          }
+        }
+        for (const variant of result.variants) {
+          if (variant.metadata && variant.metadata.ruleVerifier) {
+            const { type, expected } = variant.metadata.ruleVerifier;
+            if (type === 'loop-count' && expected !== stats.loopCount) {
+              return false;
+            }
+            if (type === 'ascender-count' && expected !== stats.ascenderCount) {
+              return false;
+            }
+            if (type === 'sandwiched-consonant' && expected !== countSandwichedConsonants(stats)) {
+              return false;
+            }
+          }
+        }
+        if (config.useEmojis) {
+          const emojiVariant = result.variants[1];
+          if (!emojiVariant.metadata || !emojiVariant.metadata.emojiDisambiguated) {
+            return false;
+          }
+        }
+        return true;
+      } catch (err) {
+        console.warn('Self-test error', err);
+        return false;
+      }
+    }
+
+    function renderResults(result) {
+      const container = document.getElementById('results');
+      container.innerHTML = '';
+      result.variants.forEach((variant, index) => {
+        const card = document.createElement('article');
+        card.className = 'variant-card';
+
+        const header = document.createElement('div');
+        header.className = 'variant-header';
+        const title = document.createElement('h3');
+        title.textContent = variant.title;
+        header.appendChild(title);
+
+        const copyBtn = document.createElement('button');
+        copyBtn.className = 'secondary';
+        copyBtn.textContent = 'Copy Variant';
+        copyBtn.addEventListener('click', () => {
+          navigator.clipboard.writeText(variant.text).then(() => {
+            copyBtn.textContent = 'Copied!';
+            setTimeout(() => (copyBtn.textContent = 'Copy Variant'), 1500);
+          });
+        });
+        header.appendChild(copyBtn);
+        card.appendChild(header);
+
+        const textBlock = document.createElement('pre');
+        textBlock.textContent = variant.text;
+        card.appendChild(textBlock);
+
+        const chipRow = document.createElement('div');
+        chipRow.className = 'chips';
+        variant.trap_tags.forEach((tag) => {
+          const chip = document.createElement('span');
+          chip.className = 'chip';
+          chip.textContent = tag;
+          chipRow.appendChild(chip);
+        });
+        card.appendChild(chipRow);
+
+        const details = document.createElement('details');
+        const summary = document.createElement('summary');
+        summary.textContent = 'Show Solution & Reasoning';
+        details.appendChild(summary);
+
+        const answerBlock = document.createElement('div');
+        answerBlock.className = 'reasoning';
+        const acceptable = variant.acceptable_variants.join(', ');
+        answerBlock.innerHTML = `
+          <p><strong>Answer:</strong> ${result.answer}</p>
+          <p><strong>Acceptable variants:</strong> ${acceptable}</p>
+          <p><strong>Reasoning:</strong> ${variant.reasoning}</p>
+          ${result.hint ? `<p><strong>Hint:</strong> ${result.hint}</p>` : ''}
+        `;
+        details.appendChild(answerBlock);
+        card.appendChild(details);
+
+        container.appendChild(card);
+      });
+    }
+
+    function downloadJSON(result) {
+      const blob = new Blob([JSON.stringify(result, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `riddleforge-${Date.now()}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function handleGenerate(regenerate = false) {
+      try {
+        const config = regenerate && state.lastConfig
+          ? { ...state.lastConfig }
+          : {
+              answer: sanitizeAnswer(document.getElementById('answer').value),
+              hint: document.getElementById('hint').value.trim(),
+              difficulty: document.getElementById('difficulty').value,
+              useEmojis: document.getElementById('useEmojis').checked,
+              useSymbols: document.getElementById('useSymbols').checked,
+              includeAcrostic: document.getElementById('includeAcrostic').checked,
+              includeHomophones: document.getElementById('includeHomophones').checked,
+              includeNumeric: document.getElementById('includeNumeric').checked,
+              includeDirectional: document.getElementById('includeDirectional').checked
+            };
+        if (!config.answer) {
+          alert('Please provide a correct answer word or phrase.');
+          return;
+        }
+        const result = createRiddleSet({ ...config });
+        state.lastConfig = { ...config };
+        state.lastResult = result;
+        renderResults(result);
+        document.getElementById('downloadBtn').disabled = false;
+        document.getElementById('regenerateBtn').disabled = false;
+      } catch (err) {
+        console.error(err);
+        alert('Generation failed self-test multiple times. Try adjusting options.');
+      }
+    }
+
+    document.getElementById('generateBtn').addEventListener('click', () => handleGenerate(false));
+    document.getElementById('regenerateBtn').addEventListener('click', () => handleGenerate(true));
+    document.getElementById('downloadBtn').addEventListener('click', () => {
+      if (state.lastResult) {
+        downloadJSON(state.lastResult);
+      }
+    });
+  </script>
+</body>
+</html>

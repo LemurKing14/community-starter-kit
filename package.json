@@ -1,0 +1,8 @@
+{
+  "name": "riddleforge",
+  "version": "1.0.0",
+  "description": "RiddleForge self-test runner",
+  "scripts": {
+    "test": "node run-tests.js"
+  }
+}
