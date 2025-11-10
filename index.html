@@ -505,8 +505,83 @@
       };
     }
 
+    function describeMetricSymbols(stats) {
+      return [
+        {
+          symbol: 'ℓ',
+          description: `ℓ = total letters obeying the rule (${stats.length}).`,
+          value: stats.length
+        },
+        {
+          symbol: 'ν',
+          description: `ν = vowels counted (${stats.vowels.length}).`,
+          value: stats.vowels.length
+        },
+        {
+          symbol: 'κ',
+          description: `κ = consonants tallied (${stats.consonants.length}).`,
+          value: stats.consonants.length
+        },
+        {
+          symbol: 'α',
+          description: `α = letters that stand tall (b d f h k l t) = ${stats.ascenderCount}.`,
+          value: stats.ascenderCount
+        },
+        {
+          symbol: 'ω',
+          description: `ω = letters with closed loops (a b d e g o p q) = ${stats.loopCount}.`,
+          value: stats.loopCount
+        },
+        {
+          symbol: 'δ',
+          description: `δ = distinct duplicates present = ${stats.repeatLetters.length}.`,
+          value: stats.repeatLetters.length
+        }
+      ];
+    }
+
+    function expressionForValue(target, metrics) {
+      const bases = metrics.filter((metric) => typeof metric.value === 'number');
+      for (const base of bases) {
+        if (base.value === target) {
+          return base.symbol;
+        }
+      }
+      for (const base of bases) {
+        for (let offset = 1; offset <= 5; offset++) {
+          if (base.value + offset === target) {
+            return `${base.symbol} + ${offset}`;
+          }
+          if (base.value - offset === target && base.value > offset) {
+            return `${base.symbol} - ${offset}`;
+          }
+        }
+      }
+      for (let i = 0; i < bases.length; i++) {
+        for (let j = i + 1; j < bases.length; j++) {
+          const first = bases[i];
+          const second = bases[j];
+          const sum = first.value + second.value;
+          if (sum === target) {
+            return `${first.symbol} + ${second.symbol}`;
+          }
+          const diff = Math.abs(first.value - second.value);
+          if (diff === target) {
+            return `|${first.symbol} - ${second.symbol}|`;
+          }
+        }
+      }
+      for (const base of bases) {
+        for (const multiplier of [2, 3]) {
+          if (base.value * multiplier === target) {
+            return `${multiplier}×${base.symbol}`;
+          }
+        }
+      }
+      return `${target}`;
+    }
+
     function buildSymbolicVariant(config, stats) {
-      const gridLetters = [];
       const canonical = stats.canonical;
       if (canonical.length === 0) {
         return {
@@ -517,56 +592,91 @@
           acceptable_variants: []
         };
       }
-      const padded = canonical.padEnd(9, canonical.repeat(3)).slice(0, 9);
-      for (let i = 0; i < 9; i += 3) {
-        gridLetters.push(padded.slice(i, i + 3).split('').join(' '));
-      }
-      const grid = gridLetters.join('\n');
+
+      const metrics = describeMetricSymbols(stats);
+      const definitions = metrics.map((metric) => `${metric.symbol} → ${metric.description}`);
+      const falseLure = `Star charts and chess problems whisper solutions, yet they mislead; keep your work inside this ledger. Everything you need is in these lines.`;
       const ruleLine = config.useSymbols
-        ? `Rule: Move → across each row, drop ↓ when told, and apply ↻ to rotate the current partial answer (last letter moves to front).`
-        : `Rule: Follow the arrows described, even without the symbols visible.`;
+        ? `Rule: Evaluate with A=1→Z=26. When α appears, count only the tall letters (b d f h k l t). Use ≥ to keep the larger of paired values and ≤ to keep the lesser.`
+        : `Rule: Even without visible symbols, follow each ≥ or ≤ comparison. Whenever α appears, count only tall letters (b d f h k l t).`;
+
+      const steps = [];
+      for (let i = 0; i < canonical.length; i++) {
+        const letter = canonical[i];
+        const value = letter.charCodeAt(0) - 64;
+        let inequalitySymbol = '≥';
+        let decoyTarget = value - Math.min(2, Math.max(1, value - 1));
+        if (value <= 2) {
+          inequalitySymbol = '≤';
+          decoyTarget = value + 2;
+        }
+        if (decoyTarget < 1) {
+          decoyTarget = 1;
+        }
+        const expressionMain = expressionForValue(value, metrics);
+        const expressionDecoy = expressionForValue(decoyTarget, metrics);
+        steps.push(`→ Step ${i + 1}: ${expressionMain} ${inequalitySymbol} ${expressionDecoy}`);
+      }
 
       const directionalLine = config.includeDirectional
-        ? `Start at row 1 col 1, move → ${Math.min(2, canonical.length)} steps, then ↓ once, then ↻ twice.`
-        : `Walk the letters in reading order, applying ↻ whenever you see it mentioned.`;
-
+        ? `Directional note: march → through the steps; if an inequality feels wrong, step ← and recompute before moving on.`
+        : null;
       const numericLine = config.includeNumeric
-        ? `Clock hint: stop after ${stats.length % 12 || 12} beats; each beat is one letter hop.`
-        : `Keep count equal to the number of letters (${stats.length}) before stating the word.`;
+        ? `Numeric check: (Σ kept values) mod 12 = ${(canonical.split('').reduce((sum, ch) => sum + (ch.charCodeAt(0) - 64), 0)) % 12 || 12}.`
+        : null;
+      const rotationLine = `↻ Trigger only if two consecutive kept numbers match; otherwise the order stands and no rotation occurs.`;
+      const concludingLine = `Translate each kept number to its letter to claim the answer.`;
 
-      let lines = [];
-      lines.push('Grid:');
-      lines.push(grid);
+      let lines = [falseLure, 'Equation Ledger:'];
+      lines = lines.concat(definitions);
       lines.push(ruleLine);
-      lines.push(directionalLine);
-      lines.push(numericLine);
-      lines.push('Everything you need is in these lines.');
+      lines.push('Sequence:');
+      lines = lines.concat(steps);
+      if (directionalLine) {
+        lines.push(directionalLine);
+      }
+      if (numericLine) {
+        lines.push(numericLine);
+      }
+      lines.push(rotationLine);
+      lines.push(concludingLine);
 
       let acrosticLineData = null;
+      let acrosticLinesCount = 0;
       if (config.includeAcrostic) {
         const sanitized = canonical;
         const acrosticLines = [];
         const baseInstruction = config.useSymbols
-          ? 'Trace the guided path and apply ↻ where marked.'
-          : 'Trace the guided path carefully.';
+          ? 'Guard each comparison; respect ≥ and ≤ before proceeding.'
+          : 'Guard each comparison even when the symbols hide.';
         for (let i = 0; i < sanitized.length; i++) {
           const letter = sanitized[i];
-          const descriptor = i === sanitized.length - 1 ? 'seal the final form.' : 'carry the sound onward.';
+          const descriptor = i === sanitized.length - 1 ? 'finalize the verdict.' : 'press forward with the proof.';
           acrosticLines.push(`${letter}${baseInstruction} Then ${descriptor}`);
         }
-        acrosticLines.push('Edit: Remove spaces between the carried sounds to finish.');
+        acrosticLines.push('Edit: Remove spaces after evaluating to express the solution.');
         lines = acrosticLines.concat(lines);
         acrosticLineData = sanitized;
+        acrosticLinesCount = acrosticLines.length;
+      }
+
+      const trapSet = [trapTags.FALSE_CATEGORY, trapTags.EDGE_CASE, trapTags.SYMBOL];
+      if (config.includeDirectional || config.includeNumeric) {
+        trapSet.push(trapTags.COMPASS);
+      }
+      if (config.includeAcrostic) {
+        trapSet.push(trapTags.ACROSTIC);
       }
 
       return {
         title: 'Symbolic/Spatial',
         text: lines.join('\n'),
-        trap_tags: [trapTags.COMPASS, trapTags.SYMBOL].concat(config.includeAcrostic ? [trapTags.ACROSTIC] : []),
-        reasoning: `Arrows guide navigation through the grid while ↻ rotations reorder letters; if present, the acrostic spells the answer before the final edit to reveal ${stats.clean}.`,
+        trap_tags: trapSet,
+        reasoning: `Mathematical comparisons map to letter values with the ascender rule restricting counts; respecting each inequality yields the correct sequence of numbers, which translate to ${stats.clean}.`,
         acceptable_variants: [stats.clean, stats.clean.toUpperCase(), stats.clean.toLowerCase()],
         metadata: {
-          acrostic: acrosticLineData
+          acrostic: acrosticLineData,
+          acrosticLines: acrosticLinesCount
         }
       };
     }
@@ -650,13 +760,16 @@
         if (config.includeAcrostic) {
           const symbolic = result.variants[2];
           const lines = symbolic.text.split('\n');
-          const sanitized = stats.canonical;
+          const expected = symbolic.metadata && symbolic.metadata.acrostic;
+          const count = symbolic.metadata && symbolic.metadata.acrosticLines;
+          if (!expected || !count) {
+            return false;
+          }
           let extracted = '';
-          const limit = Math.min(sanitized.length, lines.length - 6); // approximate offset for appended lines
-          for (let i = 0; i < limit; i++) {
+          for (let i = 0; i < Math.min(count, lines.length); i++) {
             extracted += (lines[i].trim()[0] || '').toUpperCase();
           }
-          if (!extracted.startsWith(sanitized)) {
+          if (!extracted.startsWith(expected)) {
             return false;
           }
         }
