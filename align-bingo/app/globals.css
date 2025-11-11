@@ -1,0 +1,15 @@
+*{box-sizing:border-box}
+body{margin:0;background:#0b0616;color:#fff;font-family:Inter,system-ui,sans-serif}
+.wrap{max-width:1200px;margin:24px auto;display:grid;gap:24px;grid-template-columns: 1fr 1fr;}
+.card{border-radius:16px;padding:16px;background:linear-gradient(135deg,#3a0ca3 0%,#7209b7 40%,#b5179e 100%);box-shadow:0 10px 30px rgba(0,0,0,.35)}
+.card h1{text-align:center;letter-spacing:.35em;margin:6px 0 12px 0}
+.badge{font-size:12px;text-align:center;opacity:.9;margin-bottom:6px}
+.grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;background:rgba(255,255,255,.08);padding:8px;border-radius:12px}
+.cell{background:rgba(0,0,0,.25);border-radius:10px;padding:16px 0;text-align:center;font-weight:800;font-size:22px}
+.free{background:rgba(255,255,255,.18);font-size:18px}
+.footer{margin-top:10px;font-size:12px;opacity:.95;text-align:center;word-break:break-all}
+.btn{margin-top:10px;width:100%;padding:10px 14px;border:0;border-radius:10px;font-weight:700}
+.panel{border-radius:16px;padding:16px;background:linear-gradient(135deg,#2a174f,#3c1c62)}
+.row{display:flex;gap:12px;align-items:center;margin-bottom:10px}
+.history{font-size:14px;opacity:.95}
+.commit{font-size:12px;opacity:.85}
