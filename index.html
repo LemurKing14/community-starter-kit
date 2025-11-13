@@ -198,6 +198,27 @@
       color: var(--muted);
     }
 
+    .riddle-spotlight p {
+      margin: 0 0 0.75rem;
+      white-space: pre-line;
+      font-size: 1rem;
+      line-height: 1.6;
+    }
+
+    .riddle-spotlight details {
+      background: rgba(148, 163, 184, 0.1);
+      border-radius: 12px;
+      padding: 0.75rem 1rem;
+      color: var(--muted);
+    }
+
+    .riddle-spotlight details summary {
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 0.5rem;
+    }
+
     details summary {
       cursor: pointer;
       font-weight: 600;
@@ -260,6 +281,19 @@
         <button class="secondary" id="downloadBtn" disabled>Download JSON</button>
       </div>
       <p class="notice">All logic runs locally. Each set includes a self-test to guard against unfair puzzles.</p>
+    </section>
+
+    <section class="panel riddle-spotlight">
+      <h2>Sensory Misdirection Spotlight</h2>
+      <p>
+Your nose hears me first when dawn smells like a small house fire.
+You press me flat with butter to hush the crackle in my skin.
+Name me before the alarm learns it was only breakfast.
+      </p>
+      <details>
+        <summary>Reveal solution &amp; logic</summary>
+        <p><strong>Answer:</strong> Toast. The smoky smell and faux fire alarm lure you toward danger, but the sensory cues—sizzle, butter, breakfast timing—point back to browned bread.</p>
+      </details>
     </section>
 
     <section class="panel results" id="results"></section>
