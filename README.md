@@ -6,6 +6,16 @@ Fill in the blank
 
 Frustration
 
+## Cartoon mashup generator
+
+Use `cartoon_mashup.py` to pull three random characters from the curated pool above and instantly describe a blended, seamless new hero (or villain).
+
+```
+python cartoon_mashup.py --seed 2024 -n 2
+```
+
+Each mashup prints the inspirations, a fused name, appearance notes, personality beats, and a signature move. Supply `--seed` for repeatable results.
+
 ## Getting started
 
 1. [Install the bot](https://github.com/apps/welcome) on the intended repositories. The plugin requires the following **Permissions and Events**:
