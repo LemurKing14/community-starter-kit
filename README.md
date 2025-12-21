@@ -1,55 +1,71 @@
-# welcome bot: A Probot App
+# Pokemon Trading Card Cataloger
 
-Fill in the blank
+A lightweight command-line tool that scans Pokemon trading card images, extracts identifying
+information, and looks up current market prices from the [Pokemon TCG API](https://pokemontcg.io/).
+It can process a single image or a directory of card photos, then save the catalog as JSON.
 
-## What it does
+## Features
 
-Frustration
+- Optional OCR (via Tesseract) to detect the card name and collector number from the image.
+- Fallback filename parsing so you can catalog cards even without OCR (e.g., `Pikachu-58-102.jpg`).
+- Automatic price lookup using the public Pokemon TCG API with support for API keys.
+- JSON export of cataloged cards, including set name, rarity, and market price when available.
 
-## Getting started
+## Installation
 
-1. [Install the bot](https://github.com/apps/welcome) on the intended repositories. The plugin requires the following **Permissions and Events**:
+1. Install Python 3.9+.
+2. (Optional) Install [Tesseract OCR](https://github.com/tesseract-ocr/tesseract) if you want OCR-based scanning.
+3. Install Python dependencies:
 
-- Pull requests: Read & Write
-- Issues: Read & Write
-
-2. Create a .github/config.yml file to check for content of the comments:
-
-```
-# Configuration for welcome - https://github.com/behaviorbot/welcome
-
-# Configuration for new-issue-welcome - https://github.com/behaviorbot/new-issue-welcome
-
-# Comment to be posted to on first time issues
-newIssueWelcomeComment: >
-  Thanks for opening your first issue here! Be sure to follow the issue template!
-
-# Configuration for new-pr-welcome - https://github.com/behaviorbot/new-pr-welcome
-
-# Comment to be posted to on PRs from first time contributors in your repository
-newPRWelcomeComment: >
-  Thanks for opening this pull request! Please check out our contributing guidelines.
-
-# Configuration for first-pr-merge - https://github.com/behaviorbot/first-pr-merge
-
-# Comment to be posted to on pull requests merged by a first time user
-firstPRMergeComment: >
-  Congrats on merging your first pull request! We here at behaviorbot are proud of you!
-
-# It is recommended to include as many gifs and emojis as possible!
+```bash
+pip install -r requirements.txt
 ```
 
-You can opt out of having the bot comment on first time pull requests, pull request merges, or new issues by not filling in a value for each app's respective field.
+## Usage
 
-For some inspiration about what kind of content to include in your .github/config files, check out [Electron's Configuration](https://github.com/electron/electron/blob/master/.github/config.yml).
+Catalog a single image and write `catalog.json`:
 
-## Need help?
+```bash
+python card_catalog.py path/to/Pikachu-58-102.jpg
+```
 
-If you need help using this app, we encourage you to:
+Catalog all images in a directory and write to a custom file:
 
-- Check out the [Getting Started Guide](docs/getting-started.md) in the docs folder of this repository
-- If you can't find the answer there, open an issue in this repository and add the label `question`
+```bash
+python card_catalog.py /path/to/images --output my_cards.json
+```
 
-## Project maintainers
+Provide an API key (otherwise uses the `POKEMON_TCG_API_KEY` environment variable):
 
-This project is maintained by Monalisa Octocat and friends. Use of this project under the [MIT License](LICENSE.md).
+```bash
+python card_catalog.py /path/to/images --api-key YOUR_KEY
+```
+
+The script prints a summary for each card and saves the full catalog to JSON.
+
+## Output example
+
+```json
+[
+  {
+    "name": "Pikachu",
+    "number": "58/102",
+    "set_name": "Base Set",
+    "rarity": "Common",
+    "price": 5.25,
+    "currency": "USD",
+    "image_path": "./images/Pikachu-58-102.jpg",
+    "api_id": "base1-58"
+  }
+]
+```
+
+## Notes
+
+- OCR is optional; the script will try OCR first and fall back to parsing the filename.
+- Prices come from the `tcgplayer` market price reported by the Pokemon TCG API when available.
+- Only `.png`, `.jpg`, and `.jpeg` files are scanned when pointing to a directory.
+
+## License
+
+This project is available under the [MIT License](LICENSE.md).
